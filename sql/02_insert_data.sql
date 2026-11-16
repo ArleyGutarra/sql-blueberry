@@ -95,7 +95,6 @@ VALUES
     ('ViewSonic', NULL),
     ('BenQ', NULL),
     ('Sony', NULL),
-    ('Samsung', NULL),
     ('Xiaomi', NULL),
     ('Motorola', NULL),
     ('JBL', NULL),
@@ -103,8 +102,7 @@ VALUES
     ('Brother', NULL),
     ('TP-Link', NULL),
     ('Ubiquiti', NULL),
-    ('Anker', NULL),
-    ('Western Digital', NULL);
+    ('Anker', NULL);
 
 
 -- METODOS DE PAGO
