@@ -46,7 +46,7 @@
 CREATE TABLE marca (
     id_marca SERIAL,
     nombre VARCHAR(100) NOT NULL,
-    descripcion TEXT,
+    descripcion VARCHAR(MAX),
 
     -- Restricciones
     CONSTRAINT pk_marca PRIMARY KEY (id_marca),
@@ -56,7 +56,7 @@ CREATE TABLE marca (
 CREATE TABLE metodos_pago (
     id_metodo_pago SERIAL,
     nombre VARCHAR(50) NOT NULL,
-    descripcion TEXT,
+    descripcion VARCHAR(MAX),
 
     -- Restricciones
     CONSTRAINT pk_metodos_pago PRIMARY KEY (id_metodo_pago),
@@ -67,7 +67,7 @@ CREATE TABLE categoria (
     id_categoria SERIAL,
     super_categoria INT, -- Puede ser NULL si es la categoría raíz
     nombre VARCHAR(100) NOT NULL,
-    descripcion TEXT,
+    descripcion VARCHAR(MAX),
 
     -- Restricciones
     CONSTRAINT pk_categoria PRIMARY KEY (id_categoria),
@@ -80,7 +80,7 @@ CREATE TABLE cliente (
     email VARCHAR(100) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     telefono VARCHAR(15) NOT NULL,
-    dni VARCHAR(20) NOT NULL,
+    dni CHAR(8) NOT NULL,
     nombres VARCHAR(100) NOT NULL,
     apellidos VARCHAR(100) NOT NULL,
     fecha_nacimiento DATE NOT NULL,
@@ -112,7 +112,7 @@ CREATE TABLE cliente_direcciones (
 CREATE TABLE producto (
     id_producto SERIAL,
     nombre VARCHAR(150) NOT NULL,
-    descripcion TEXT,
+    descripcion VARCHAR(MAX),
     id_categoria INT NOT NULL,
     id_marca INT NOT NULL,
     precio DECIMAL(10, 2) NOT NULL,
@@ -222,7 +222,7 @@ CREATE TABLE entrega (
     CONSTRAINT fk_entrega__origen FOREIGN KEY (lugar_origen) REFERENCES establecimiento(id_establecimiento),
     CONSTRAINT fk_entrega__destino FOREIGN KEY (lugar_destino) REFERENCES cliente_direcciones(id_direccion_cliente),
     CONSTRAINT ck_entrega_tipo CHECK (
-    (tipo_entrega = 'domicilio' AND lugar_destino IS NOT NULL)
+    (tipo_entrega = 'envio' AND lugar_destino IS NOT NULL)
     OR
     (tipo_entrega = 'recojo_tienda' AND lugar_destino IS NULL)
     ),
@@ -254,7 +254,7 @@ CREATE TABLE reembolso (
     id_pago INT NOT NULL,
     fecha_reembolso TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     monto DECIMAL(10, 2) NOT NULL,
-    motivo TEXT,
+    motivo VARCHAR(MAX),
     estado_reembolso VARCHAR(50) NOT NULL,
 
     -- Restricciones
