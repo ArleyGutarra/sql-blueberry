@@ -14,7 +14,7 @@
 --    * La seccion D tiene dos partes: D.1 elimina UN usuario de cada rol
 --      (el otro sigue funcionando) y D.2 elimina el resto y los roles.
 --      Ejecuta D.1 antes que D.2.
---    * Las contrasenas son de ejemplo: cambialas.
+--    * Las contrasenas son de ejemplo
 -- =====================================================================
 
 
@@ -31,10 +31,11 @@
 --                      password_hash), registra pedidos, pagos, entregas,
 --                      reembolsos y carritos, y limpia carritos.
 --  rol_almacen       : maneja el inventario. Lee catalogo, pedidos y
---                      entregas; registra movimientos y actualiza stock.
+--                      entregas; agrega filas de inventario y actualiza stock.
 --                      No ve clientes ni pagos.
---  rol_analista      : SOLO LECTURA para reportes. No ve password_hash,
---                      dni, datos de tarjeta ni direcciones.
+--  rol_analista      : SOLO LECTURA para reportes. No ve password_hash, dni, 
+--                      datos de tarjeta ni de direccion solo ve departamento,
+--                      provincia, distrito y código postal, no la dirección exacta.
 --
 --  USUARIOS (con login) Y ROL QUE TIENEN
 --  ---------------------------------------------------------------------
@@ -53,9 +54,7 @@
 --  Tabla                     | administrador | ventas      | almacen   | analista
 --  --------------------------+---------------+-------------+-----------+---------
 --  cliente                   | R I U D       | R*          | -         | R*
---  direccion                 | R I U D       | R I         | R         | -
---  provincia                 | R I U D       | R           | R         | R
---  distrito                  | R I U D       | R           | R         | R
+--  direccion                 | R I U D       | R I         | R         | R*
 --  cliente_direcciones       | R I U D       | R I         | -         | -
 --  pedido                    | R I U D       | R I U*      | R* U*     | R
 --  articulos_pedido          | R I U D       | R I         | R         | R
@@ -72,7 +71,6 @@
 --  componentes_computadora   | R I U D       | R           | R         | R
 --  carrito                   | R I U D       | R I U* D    | -         | R
 --  articulos_carrito         | R I U D       | R I U* D    | -         | R
---  movimiento_inventario     | R I U D       | -           | R I       | R
 --  ---------------------------------------------------------------------
 
 -- A.1) Roles (grupos de permisos). NOLOGIN: no pueden iniciar sesion.
@@ -118,17 +116,19 @@ GRANT SELECT (id_cliente, email, telefono, nombres, apellidos, fecha_nacimiento)
 GRANT SELECT (id_pago, id_pedido, fecha_pago, id_metodo_pago, estado_pago)
     ON pago TO rol_analista;                             -- sin codigo_transaccion ni tarjeta_last_digits
 GRANT SELECT ON
-    provincia, distrito, pedido, articulos_pedido, entrega, reembolso,
+    pedido, articulos_pedido, entrega, reembolso,
     producto, producto_especificaciones, categoria, marca, metodos_pago,
     establecimiento, inventario, componentes_computadora,
-    carrito, articulos_carrito, movimiento_inventario
+    carrito, articulos_carrito
     TO rol_analista;
+GRANT SELECT (id_direccion, departamento, provincia, distrito, codigo_postal)
+    ON direccion TO rol_analista;
 
 -- rol_ventas: lectura de casi todo (sin password_hash y sin movimiento_inventario).
 GRANT SELECT (id_cliente, email, telefono, dni, nombres, apellidos, fecha_nacimiento)
     ON cliente TO rol_ventas;                            -- sin password_hash
 GRANT SELECT ON
-    direccion, provincia, distrito, cliente_direcciones,
+    direccion, cliente_direcciones,
     pedido, articulos_pedido, entrega, pago, reembolso,
     producto, producto_especificaciones, categoria, marca, metodos_pago,
     establecimiento, inventario, componentes_computadora,
@@ -140,8 +140,8 @@ GRANT SELECT (id_pedido, fecha_pedido, estado_pedido)
     ON pedido TO rol_almacen;                            -- solo lo necesario para despachar
 GRANT SELECT ON
     producto, producto_especificaciones, categoria, marca,
-    componentes_computadora, establecimiento, inventario, movimiento_inventario,
-    articulos_pedido, entrega, direccion, distrito, provincia
+    componentes_computadora, establecimiento, inventario, 
+    articulos_pedido, entrega, direccion
     TO rol_almacen;
 
 -- ---------------------------------------------------------------------
@@ -155,7 +155,7 @@ GRANT INSERT ON
     TO rol_ventas;
 
 -- rol_almacen: registra movimientos y filas de inventario.
-GRANT INSERT ON inventario, movimiento_inventario TO rol_almacen;
+GRANT INSERT ON inventario TO rol_almacen;
 
 -- Para insertar en tablas con ids autoincrementales (SERIAL) se necesita
 -- uso de las secuencias. Si tus ids son IDENTITY, esta linea no hace dano.
@@ -199,47 +199,6 @@ ALTER ROLE rol_administrador  CREATEDB;   -- el rol, para dejarlo documentado
 GRANT ALL PRIVILEGES ON ALL TABLES    IN SCHEMA public TO rol_administrador;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO rol_administrador;
 
-
--- =====================================================================
--- E) VERIFICACION (opcional: ejecutar despues de B y de C)
--- =====================================================================
-
--- Usuarios, rol al que pertenecen y atributos
-SELECT r.rolname AS usuario, g.rolname AS rol, r.rolcanlogin, r.rolcreatedb
-FROM pg_auth_members m
-JOIN pg_roles r ON r.oid = m.member
-JOIN pg_roles g ON g.oid = m.roleid
-WHERE g.rolname LIKE 'rol\_%'
-ORDER BY g.rolname, r.rolname;
-
--- Permisos de tabla por rol (los permisos por columna, como los de cliente y
--- pago, no salen aqui: se ven en la consulta siguiente)
-SELECT grantee, table_name, string_agg(privilege_type, ', ' ORDER BY privilege_type) AS permisos
-FROM information_schema.role_table_grants
-WHERE grantee LIKE 'rol\_%' AND table_schema = 'public'
-GROUP BY grantee, table_name
-ORDER BY grantee, table_name;
-
--- Permisos por columna (muestra las restricciones en cliente y pago)
-SELECT grantee, table_name, column_name, privilege_type
-FROM information_schema.column_privileges
-WHERE grantee LIKE 'rol\_%' AND table_name IN ('cliente', 'pago')
-ORDER BY grantee, table_name, column_name, privilege_type;
-
--- Prueba puntual: true = tiene el permiso, false = no lo tiene
-SELECT has_table_privilege('juan_ventas',  'pedido',                'INSERT') AS ventas_inserta_pedido,
-       has_table_privilege('juan_ventas',  'pedido',                'DELETE') AS ventas_borra_pedido,
-       has_table_privilege('maria_almacen','movimiento_inventario', 'INSERT') AS almacen_inserta_mov,
-       has_table_privilege('maria_almacen','cliente',               'SELECT') AS almacen_lee_cliente,
-       has_table_privilege('lucia_analista','pedido',               'UPDATE') AS analista_actualiza_pedido;
--- !!!!!!!!!!!!!PRUEBAS QUE QUITE!!!!!!!!!!!!!
--- Prueba en vivo (quita los "--" para probar; el segundo debe fallar):
--- SET ROLE juan_ventas;
--- SELECT nombres, apellidos FROM cliente LIMIT 1;   -- funciona
--- SELECT password_hash FROM cliente LIMIT 1;        -- ERROR: permission denied
--- RESET ROLE;
-
-
 -- =====================================================================
 -- C) REVOCAR PERMISOS (REVOKE)
 --    Nota: REVOKE sobre una tabla tambien quita los permisos por columna
@@ -249,7 +208,6 @@ SELECT has_table_privilege('juan_ventas',  'pedido',                'INSERT') AS
 -- ---------------------------------------------------------------------
 -- C.1) Revocar LECTURA (SELECT)
 -- ---------------------------------------------------------------------
--- Ejemplo puntual: el analista deja de ver los pagos.
 REVOKE SELECT ON pago FROM rol_analista;
 -- Revocacion completa de lectura para los tres roles operativos:
 REVOKE SELECT ON ALL TABLES IN SCHEMA public FROM rol_ventas, rol_almacen, rol_analista;
@@ -257,8 +215,7 @@ REVOKE SELECT ON ALL TABLES IN SCHEMA public FROM rol_ventas, rol_almacen, rol_a
 -- ---------------------------------------------------------------------
 -- C.2) Revocar INSERCION (INSERT)
 -- ---------------------------------------------------------------------
--- Ejemplo puntual: almacen deja de registrar movimientos.
-REVOKE INSERT ON movimiento_inventario FROM rol_almacen;
+REVOKE INSERT ON inventario FROM rol_almacen;
 -- Revocacion completa:
 REVOKE INSERT ON ALL TABLES IN SCHEMA public FROM rol_ventas, rol_almacen;
 REVOKE USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public FROM rol_ventas, rol_almacen;
@@ -266,7 +223,6 @@ REVOKE USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public FROM rol_ventas, rol_alma
 -- ---------------------------------------------------------------------
 -- C.3) Revocar ELIMINACION (DELETE)
 -- ---------------------------------------------------------------------
--- Ejemplo puntual: ventas deja de borrar carritos.
 REVOKE DELETE ON carrito FROM rol_ventas;
 -- Revocacion completa:
 REVOKE DELETE ON ALL TABLES IN SCHEMA public FROM rol_ventas;
@@ -274,7 +230,6 @@ REVOKE DELETE ON ALL TABLES IN SCHEMA public FROM rol_ventas;
 -- ---------------------------------------------------------------------
 -- C.4) Revocar ACTUALIZACION (UPDATE)
 -- ---------------------------------------------------------------------
--- Ejemplo puntual: almacen deja de modificar el stock.
 REVOKE UPDATE ON inventario FROM rol_almacen;
 -- Revocacion completa:
 REVOKE UPDATE ON ALL TABLES IN SCHEMA public FROM rol_ventas, rol_almacen;
