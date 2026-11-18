@@ -1,4 +1,6 @@
+---------------------------------
 -- CATEGORIAS
+---------------------------------
 -- Categorias principales 
 INSERT INTO categoria (nombre, descripcion)
 VALUES
@@ -62,61 +64,71 @@ VALUES
     (10, 'Routers y repetidores', NULL),
     (10, 'UPS y estabilizadores', NULL);
 
+---------------------------------
 -- MARCA
-INSERT INTO marca (nombre, descripcion)
+---------------------------------
+INSERT INTO marca (nombre, pais, descripcion)
 VALUES
-    ('ASUS', NULL),
-    ('MSI', NULL),
-    ('Gigabyte', NULL),
-    ('ASRock', NULL),
-    ('Intel', NULL),
-    ('AMD', NULL),
-    ('NVIDIA', NULL),
-    ('Corsair', NULL),
-    ('Kingston', NULL),
-    ('Crucial', NULL),
-    ('Samsung', NULL),
-    ('Western Digital', NULL),
-    ('Seagate', NULL),
-    ('ADATA', NULL),
-    ('TeamGroup', NULL),
-    ('Cooler Master', NULL),
-    ('NZXT', NULL),
-    ('Thermaltake', NULL),
-    ('Logitech', NULL),
-    ('Razer', NULL),
-    ('HyperX', NULL),
-    ('HP', NULL),
-    ('Dell', NULL),
-    ('Lenovo', NULL),
-    ('Acer', NULL),
-    ('Apple', NULL),
-    ('LG', NULL),
-    ('ViewSonic', NULL),
-    ('BenQ', NULL),
-    ('Sony', NULL),
-    ('Xiaomi', NULL),
-    ('Motorola', NULL),
-    ('JBL', NULL),
-    ('Epson', NULL),
-    ('Brother', NULL),
-    ('TP-Link', NULL),
-    ('Ubiquiti', NULL),
-    ('Anker', NULL);
+    ('ASUS', 'Taiwán', NULL),
+    ('MSI', 'Taiwán', NULL),
+    ('Gigabyte', 'Taiwán', NULL),
+    ('ASRock', 'Taiwán', NULL),
+    ('Intel', 'Estados Unidos', NULL),
+    ('AMD', 'Estados Unidos', NULL),
+    ('NVIDIA', 'Estados Unidos', NULL),
+    ('Corsair', 'Estados Unidos', NULL),
+    ('Kingston', 'Estados Unidos', NULL),
+    ('Crucial', 'Estados Unidos', NULL),
+    ('Samsung', 'Corea del Sur', NULL),
+    ('Western Digital', 'Estados Unidos', NULL),
+    ('Seagate', 'Estados Unidos', NULL),
+    ('ADATA', 'Taiwán', NULL),
+    ('TeamGroup', 'Taiwán', NULL),
+    ('Cooler Master', 'Taiwán', NULL),
+    ('NZXT', 'Estados Unidos', NULL),
+    ('Thermaltake', 'Taiwán', NULL),
+    ('Logitech', 'Suiza', NULL),
+    ('Razer', 'Singapur', NULL),
+    ('HyperX', 'Estados Unidos', NULL),
+    ('HP', 'Estados Unidos', NULL),
+    ('Dell', 'Estados Unidos', NULL),
+    ('Lenovo', 'China', NULL),
+    ('Acer', 'Taiwán', NULL),
+    ('Apple', 'Estados Unidos', NULL),
+    ('LG', 'Corea del Sur', NULL),
+    ('ViewSonic', 'Estados Unidos', NULL),
+    ('BenQ', 'Taiwán', NULL),
+    ('Sony', 'Japón', NULL),
+    ('Xiaomi', 'China', NULL),
+    ('Motorola', 'Estados Unidos', NULL),
+    ('JBL', 'Estados Unidos', NULL),
+    ('Epson', 'Japón', NULL),
+    ('Brother', 'Japón', NULL),
+    ('TP-Link', 'China', NULL),
+    ('Ubiquiti', 'Estados Unidos', NULL),
+    ('Anker', 'China', NULL);
 
 
+---------------------------------
 -- METODOS DE PAGO
-INSERT INTO metodos_pago (nombre, descripcion)
+---------------------------------
+INSERT INTO metodos_pago (nombre_metodo_pago)
 VALUES
-    ('Tarjeta de crédito', NULL),
-    ('Tarjeta de débito', NULL),
-    ('Transferencia bancaria', NULL),
-    ('Yape', 'Billetera digital peruana.'),
-    ('Plin', 'Billetera digital peruana.'),
-    ('Pago en efectivo', NULL),
-    ('Pago contra entrega', NULL);
+    ('Tarjeta de crédito'),
+    ('Tarjeta de débito'),
+    ('Transferencia bancaria'),
+    ('Yape'),
+    ('Plin'),
+    ('Pago en efectivo'),
+    ('Pago contra entrega'),
+    ('PayPal'),
+    ('Google Pay'),
+    ('Apple Pay');
 
+
+---------------------------------
 -- CLIENTES
+---------------------------------
 INSERT INTO cliente (email, password_hash, telefono, dni, nombres, apellidos, fecha_nacimiento)
 VALUES
     ('andrea.lopez@gmail.com', 'hash_demo_001', '987654321', '71234561', 'Andrea', 'Lopez Garcia', '2001-03-15'),
@@ -136,48 +148,51 @@ VALUES
     ('mariana.paredes@gmail.com', 'hash_demo_015', '932678901', '75723456', 'Mariana', 'Paredes Luna', '2002-07-27'),
     ('ricardo.gutierrez@gmail.com', 'hash_demo_016', '921789012', '76834567', 'Ricardo', 'Gutierrez Ramos', '1999-11-16');
 
+---------------------------------
 --  DIRECCIONES
-INSERT INTO cliente_direcciones (id_cliente, departamento, provincia, distrito, direccion, referencia)
+---------------------------------
+INSERT INTO direccion (departamento, provincia, distrito, direccion, codigo_postal, referencia)
 VALUES
-    -- Cliente 1
-    (1, 'Lima', 'Lima', 'San Miguel', 'Av. La Marina 1234', 'Cerca de Plaza San Miguel'),
+    ('Lima', 'Lima', 'San Miguel', 'Av. La Marina 1234', '15088', 'Cerca de Plaza San Miguel'),
+    ('Lima', 'Lima', 'Miraflores', 'Av. Larco 456', '15074', 'A dos cuadras del parque Kennedy'),
+    ('Lima', 'Lima', 'Surco', 'Jr. Monte Rosa 789', '15023', 'Cerca del centro comercial'),
+    ('La Libertad', 'Trujillo', 'Trujillo', 'Jr. Pizarro 234', '13001', NULL),
+    ('La Libertad', 'Trujillo', 'Víctor Larco Herrera', 'Av. Larco 567', '13012', 'Cerca de la universidad'),
+    ('Lima', 'Lima', 'San Borja', 'Av. San Luis 876', '15036', NULL),
+    ('Cusco', 'Cusco', 'Wanchaq', 'Av. La Cultura 432', '08002', NULL),
+    ('Piura', 'Piura', 'Piura', 'Av. Grau 123', '20001', NULL),
+    ('Lima', 'Lima', 'La Molina', 'Av. Javier Prado 456', '15024', 'Cerca de la universidad'),
+    ('Lima', 'Lima', 'Comas', 'Av. Universitaria 789', '15301', NULL),
+    ('Lima', 'Lima', 'Independencia', 'Av. Túpac Amaru 321', '15302', NULL),
+    ('Junín', 'Huancayo', 'Huancayo', 'Jr. Real 654', '12001', NULL),
+    ('Lima', 'Lima', 'Ate', 'Av. Separadora Industrial 159', '15038', NULL),
+    ('Lima', 'Lima', 'Barranco','Jr. Domeyer 753','15063','Cerca del malecón'),
+    ('Lima','Lima','Chorrillos','Av. Huaylas 852','15067','Cerca del malecón');
 
-    -- Cliente 2
-    (2, 'Lima', 'Lima', 'Miraflores', 'Av. Larco 456', 'A dos cuadras del parque Kennedy'),
-    (2, 'Lima', 'Lima', 'Surco', 'Jr. Monte Rosa 789', 'Cerca del centro comercial'),
+INSERT INTO cliente_direcciones (id_cliente, id_direccion)
+VALUES
+    (1, 1), -- Cliente 1
+    (2, 2), -- Cliente 2
+    (2, 3), -- Cliente 2    
+    (5, 4), -- Cliente 5
+    (5, 5), -- Cliente 5
+    (6, 6), -- Cliente 6
+    (7, 7), -- Cliente 7
+    (9, 8), -- Cliente 9
+    (10, 9), -- Cliente 10
+    (11, 10), -- Cliente 11
+    (11, 11), -- Cliente 11
+    (12, 12), -- Cliente 12
+    (14, 13), -- Cliente 14
+    (15, 14), -- Cliente 15
+    (15, 15); -- Cliente 15
 
-    -- Cliente 5
-    (5, 'La Libertad', 'Trujillo', 'Trujillo', 'Jr. Pizarro 234', NULL),
-    (5, 'La Libertad', 'Trujillo', 'Víctor Larco Herrera', 'Av. Larco 567', 'Cerca de la universidad'),
-
-    -- Cliente 6
-    (6, 'Lima', 'Lima', 'San Borja', 'Av. San Luis 876', NULL),
-
-    -- Cliente 7
-    (7, 'Cusco', 'Cusco', 'Wanchaq', 'Av. La Cultura 432', NULL),
-
-    -- Cliente 9
-    (9, 'Piura', 'Piura', 'Piura', 'Av. Grau 123', NULL),
-
-    -- Cliente 10
-    (10, 'Lima', 'Lima', 'La Molina', 'Av. Javier Prado 456', 'Cerca de la universidad'),
-
-    -- Cliente 11
-    (11, 'Lima', 'Lima', 'Comas', 'Av. Universitaria 789', NULL),
-    (11, 'Lima', 'Lima', 'Independencia', 'Av. Túpac Amaru 321', NULL),
-
-    -- Cliente 12
-    (12, 'Junín', 'Huancayo', 'Huancayo', 'Jr. Real 654', NULL),
-
-    -- Cliente 14
-    (14, 'Lima', 'Lima', 'Ate', 'Av. Separadora Industrial 159', NULL),
-
-    -- Cliente 15
-    (15, 'Lima', 'Lima', 'Barranco', 'Jr. Domeyer 753', NULL),
-    (15, 'Lima', 'Lima', 'Chorrillos', 'Av. Huaylas 852', 'Cerca del malecón');
+-- Clientes sin dirección asignada (para probar la integridad referencial): 3, 4, 8, 13
 
 
+---------------------------------
 -- PRODUCTOS
+---------------------------------
 INSERT INTO producto (nombre, descripcion, id_categoria, id_marca, precio, peso) 
 VALUES
     -- Componentes de la PC 1 (IDs 1 al 8)
@@ -208,7 +223,10 @@ VALUES
     ('Teclado Razer BlackWidow V3', 'Teclado mecánico con switches verdes táctiles.', 33, 20, 99.99, 1.10),
     ('Audífonos HyperX Cloud II', 'Sonido envolvente 7.1 y máxima comodidad.', 35, 21, 79.99, 0.35);
 
+
+---------------------------------
 -- COMPONENTES DE COMPUTADORA
+---------------------------------
 INSERT INTO componentes_computadora (id_computadora, id_componente, cantidad)
 VALUES
     -- Desglose de la PC 1 (ID_computadora = 15)
@@ -229,7 +247,10 @@ VALUES
     (16, 13, 1), -- 1x PSU Thermaltake
     (16, 14, 1); -- 1x Gabinete Cooler Master
 
-    -- ESPECIFICACIONES DE PRODUCTOS
+
+---------------------------------
+-- ESPECIFICACIONES DE PRODUCTOS
+---------------------------------
 INSERT INTO producto_especificaciones (id_producto, nombre_especificacion, valor)
 VALUES
     -- Especificaciones para el Procesador AMD (ID = 1)
@@ -260,3 +281,96 @@ VALUES
     (18, 'DPI Máximo', '25,600 DPI'),
     (18, 'Botones programables', '11 botones'),
     (18, 'Peso ajustable', 'Sí, 5 pesas de 3.6g');
+
+
+---------------------------------
+-- ESTABLECIMIENTOS
+---------------------------------
+
+-- DIRECCIONES DE ESTABLECIMIENTOS
+INSERT INTO direccion
+    (departamento, provincia, distrito, direccion, codigo_postal, referencia)
+VALUES
+    ('Lima', 'Lima', 'Miraflores','Av. José Larco 850', '15074','Cerca del parque Kennedy.'),
+    ('Lima', 'Lima', 'San Isidro','Av. República de Panamá 3055', '15047','Zona comercial y empresarial.'),
+    ('Lima', 'Lima', 'Cercado de Lima','Jr. Paruro 1250', '15001','Zona comercial de productos tecnológicos.'),
+    ('Arequipa', 'Arequipa', 'Yanahuara','Av. Ejército 710', '04013','Cerca del centro comercial de la zona.'),
+    ('Cusco', 'Cusco', 'Cusco','Av. de la Cultura 1850', '08003', 'Cerca de la Universidad Nacional de San Antonio Abad.'),
+    ('La Libertad', 'Trujillo', 'Trujillo','Av. América Oeste 750', '13011','Cerca de la zona comercial de Trujillo.'),
+    ('Piura', 'Piura', 'Piura','Av. Sánchez Cerro 1250', '20001','Zona comercial de la ciudad.'),
+    ('Lambayeque', 'Chiclayo', 'Chiclayo','Av. José Leonardo Ortiz 650', '14001','Zona céntrica de Chiclayo.'),
+    ('Junín', 'Huancayo', 'Huancayo','Av. Giráldez 520', '12001','Cerca del centro de Huancayo.'),
+    ('Tacna', 'Tacna', 'Tacna','Av. Bolognesi 1450', '23001', 'Zona comercial de Tacna.');
+
+-- ESTABLECIMIENTOS
+
+INSERT INTO establecimiento
+    (tipo_establecimiento, nombre, id_direccion)
+VALUES
+    ('tienda', 'Blueberry Miraflores', 16),
+    ('almacen', 'Almacen Blueberry San Isidro', 17),
+    ('almacen', ' Almacen Blueberry Lima Centro', 18),
+    ('tienda', 'Blueberry Arequipa', 19),
+    ('tienda', 'Blueberry Cusco', 20),
+    ('tienda', 'Blueberry Trujillo', 21),
+    ('tienda', 'Blueberry Piura', 22),
+    ('almacen', 'Almacen Blueberry Chiclayo', 23),
+    ('tienda', 'Blueberry Huancayo', 24),
+    ('almacen', 'Almacen Blueberry Tacna', 25);
+
+----------------------------------------
+-- INVENTARIO DE ESTABLECIMIENTOS
+----------------------------------------
+INSERT INTO inventario
+    (id_establecimiento, id_producto, stock)
+VALUES
+    -- BLUEBERRY MIRAFLORES (ID 1) - TIENDA
+    (1, 16, 1),  -- 1 unidad de PC Armada Office Budget
+    (1, 17, 4),  -- 4 unidades de Monitor LG UltraGear 27"
+    (1, 18, 8),  -- 8 unidades de Mouse Logitech G502 Hero
+
+    -- BLUEBERRY SAN ISIDRO (ID 2) - ALMACEN
+    (2, 15, 2),  -- 2 unidades de PC Armada Gaming Extreme
+    (2, 1, 8),   -- 8 unidades de AMD Ryzen 7 7800X3D
+    (2, 5, 10),  -- 10 unidades de Samsung 990 PRO 2TB
+
+    -- BLUEBERRY LIMA CENTRO (ID 3) - ALMACEN
+    (3, 3, 12),  -- 12 unidades de Corsair Vengeance 32GB DDR5
+    (3, 4, 5),   -- 5 unidades de MSI GeForce RTX 4080
+    (3, 19, 8),  -- 8 unidades de Teclado Razer BlackWidow V3
+
+    -- BLUEBERRY AREQUIPA (ID 4) - TIENDA
+    (4, 9, 4),   -- 4 unidades de Intel Core i5-13400
+    (4, 10, 3),  -- 3 unidades de Gigabyte B760M DS3H
+    (4, 17, 2),  -- 2 unidades de Monitor LG UltraGear 27"
+
+    -- BLUEBERRY CUSCO (ID 5) - TIENDA
+    (5, 11, 6),  -- 6 unidades de Kingston FURY Beast 16GB DDR4
+    (5, 12, 5),  -- 5 unidades de Western Digital Blue SN570 1TB
+    (5, 13, 4),  -- 4 unidades de Thermaltake Smart 500W
+
+    -- BLUEBERRY TRUJILLO (ID 6) - TIENDA
+    (6, 1, 3),   -- 3 unidades de AMD Ryzen 7 7800X3D
+    (6, 6, 3),   -- 3 unidades de Corsair RM850x
+    (6, 20, 5),  -- 5 unidades de Audífonos HyperX Cloud II
+
+    -- BLUEBERRY PIURA (ID 7) - TIENDA
+    (7, 2, 3),   -- 3 unidades de ASUS ROG Strix B650-A
+    (7, 5, 4),   -- 4 unidades de Samsung 990 PRO 2TB
+    (7, 18, 6),  -- 6 unidades de Mouse Logitech G502 Hero
+
+    -- BLUEBERRY CHICLAYO (ID 8) - ALMACEN
+    (8, 6, 8),   -- 8 unidades de Corsair RM850x
+    (8, 7, 6),   -- 6 unidades de NZXT H7 Flow
+    (8, 19, 10), -- 10 unidades de Teclado Razer BlackWidow V3
+
+    -- BLUEBERRY HUANCAYO (ID 9) - TIENDA
+    (9, 9, 3),   -- 3 unidades de Intel Core i5-13400
+    (9, 11, 4),  -- 4 unidades de Kingston FURY Beast 16GB DDR4
+    (9, 20, 4),  -- 4 unidades de Audífonos HyperX Cloud II
+
+    -- BLUEBERRY TACNA (ID 10) - ALMACEN
+    (10, 10, 6), -- 6 unidades de Gigabyte B760M DS3H
+    (10, 12, 8), -- 8 unidades de Western Digital Blue SN570 1TB
+    (10, 14, 6); -- 6 unidades de Cooler Master MasterBox Q300L
+

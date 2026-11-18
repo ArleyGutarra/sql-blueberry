@@ -11,14 +11,15 @@
 
 -- ESQUEMA DE BASE DE DATOS PARA LA TIENDA EN LÍNEA "BLUEBERRY"
 -- Catálogos
--- marca(#id_marca, nombre, descripcion, pais)
+-- marca(#id_marca, nombre, descripcion, pais *) **
 -- metodos_pago(#id_metodo_pago, nombre_metodo_pago)
 -- categoria(#id_categoria, #super_categoria, nombre, descripcion)
 
--- Cliente
+-- Cliente **
 -- cliente(id_cliente, email, password_hash, telefono, dni, nombres, apellidos, fecha_nacimiento)  
--- direccion(id_direccion, departamento, provincia, distrito, direccion, codigo_postal, referencia)
--- cliente_direcciones(#id_direccion, #id_cliente)  
+-- direccion(id_direccion, departamento, provincia, distrito, direccion, codigo_postal, referencia) **
+-- cliente_direcciones(#id_direccion, #id_cliente) ** 
+-- # NOTA: Implementar la cardinalidad de 1:N entre cliente y direcciones para la Fase 3 mediante CONSTRAINTS.
 
 -- Productos
 -- producto(id_producto, nombre, descripcion, id_categoria, id_marca, precio, peso)
@@ -26,7 +27,7 @@
 -- componentes_computadora(#id_computadora, #id_componente, cantidad)
 
 -- Establecimientos e inventario
--- establecimiento(id_establecimiento, tipo_establecimiento, nombre, #id_direccion)  
+-- establecimiento(id_establecimiento, tipo_establecimiento, nombre, #id_direccion *) **
 -- inventario(#id_establecimiento, #id_producto, stock)
 
 -- Pedidos, entregas y pagos
@@ -94,7 +95,7 @@ CREATE TABLE IF NOT EXISTS cliente (
     CONSTRAINT ck_cliente_email CHECK (email ~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
 );
 
-CREATE TABLE IF NOT EXISTS direcciones (
+CREATE TABLE IF NOT EXISTS direccion (
     id_direccion SERIAL,
     departamento VARCHAR(100) NOT NULL,
     provincia VARCHAR(100) NOT NULL,
@@ -114,7 +115,7 @@ CREATE TABLE IF NOT EXISTS cliente_direcciones (
     --Restricciones
     CONSTRAINT pk_cliente_direcciones PRIMARY KEY (id_cliente, id_direccion),
     CONSTRAINT fk_cliente_direcciones__cliente FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente),
-    CONSTRAINT fk_cliente_direcciones__direccion FOREIGN KEY (id_direccion) REFERENCES direcciones(id_direccion)
+    CONSTRAINT fk_cliente_direcciones__direccion FOREIGN KEY (id_direccion) REFERENCES direccion(id_direccion)
 );
 
 -- 2. Tablas relacionadas con el producto
@@ -165,7 +166,7 @@ CREATE TABLE IF NOT EXISTS establecimiento (
     id_direccion INT NOT NULL,
 
     -- Restricciones
-    CONSTRAINT fk_establecimiento__direccion FOREIGN KEY (id_direccion) REFERENCES direcciones(id_direccion),
+    CONSTRAINT fk_establecimiento__direccion FOREIGN KEY (id_direccion) REFERENCES direccion(id_direccion),
     CONSTRAINT ck_establecimiento_tipo CHECK (tipo_establecimiento IN ('tienda', 'almacen'))
 );
 
@@ -228,7 +229,7 @@ CREATE TABLE IF NOT EXISTS entrega (
     CONSTRAINT pk_entrega PRIMARY KEY (id_entrega),
     CONSTRAINT fk_entrega__pedido FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido),
     CONSTRAINT fk_entrega__origen FOREIGN KEY (lugar_origen) REFERENCES establecimiento(id_establecimiento),
-    CONSTRAINT fk_entrega__destino FOREIGN KEY (id_lugar_destino) REFERENCES direcciones(id_direccion),
+    CONSTRAINT fk_entrega__destino FOREIGN KEY (id_lugar_destino) REFERENCES direccion(id_direccion),
     CONSTRAINT ck_entrega_tipo CHECK (
     (tipo_entrega = 'envio' AND id_lugar_destino IS NOT NULL)
     OR
