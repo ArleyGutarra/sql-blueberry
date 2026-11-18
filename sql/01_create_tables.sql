@@ -4,8 +4,7 @@
 -- 1. Crear la base de datos "blueberry_db" en PostgreSQL.
 -- $ CREATE DATABASE blueberry_db;
 
--- 2. Entra a la base de datos "blueberry_db" y ejecuta este script para crear las tablas.
--- $ \c blueberry_db
+-- 2. Salir de psql y ejecutar el siguiente comando para crear las tablas en "blueberry_db".
 -- $ psql -U tu_usuario -d blueberry_db -f /ruta/al/archivo/script.sql
 
 ----------------------------------------------------------
@@ -44,18 +43,18 @@
 
 
 -- 0. Tablas de catálogo independientes
-CREATE TABLE marca (
+CREATE TABLE IF NOT EXISTS marca (
     id_marca SERIAL,
     nombre VARCHAR(100) NOT NULL,
     pais VARCHAR(100) NOT NULL,  -- pais de ....
-    descripcion VARCHAR(MAX),
+    descripcion VARCHAR(255),
 
     -- Restricciones
     CONSTRAINT pk_marca PRIMARY KEY (id_marca),
     CONSTRAINT uq_marca_nombre UNIQUE (nombre)
 );
 
-CREATE TABLE metodos_pago (
+CREATE TABLE IF NOT EXISTS metodos_pago (
     id_metodo_pago SERIAL,
     nombre_metodo_pago VARCHAR(50) NOT NULL,
 
@@ -64,11 +63,11 @@ CREATE TABLE metodos_pago (
     CONSTRAINT uq_metodos_pago_nombre_metodo_pago UNIQUE (nombre_metodo_pago)
 );
 
-CREATE TABLE categoria (
+CREATE TABLE IF NOT EXISTS categoria (
     id_categoria SERIAL,
     super_categoria INT, -- Puede ser NULL si es la categoría raíz
     nombre VARCHAR(100) NOT NULL,
-    descripcion VARCHAR(MAX),
+    descripcion VARCHAR(255),
 
     -- Restricciones
     CONSTRAINT pk_categoria PRIMARY KEY (id_categoria),
@@ -76,7 +75,7 @@ CREATE TABLE categoria (
 );
 
 -- 1. Tablas relacionadas con el cliente
-CREATE TABLE cliente (
+CREATE TABLE IF NOT EXISTS cliente (
     id_cliente SERIAL,
     email VARCHAR(100) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
@@ -95,7 +94,7 @@ CREATE TABLE cliente (
     CONSTRAINT ck_cliente_email CHECK (email ~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
 );
 
-CREATE TABLE direcciones (
+CREATE TABLE IF NOT EXISTS direcciones (
     id_direccion SERIAL,
     departamento VARCHAR(100) NOT NULL,
     provincia VARCHAR(100) NOT NULL,
@@ -105,10 +104,10 @@ CREATE TABLE direcciones (
     codigo_postal CHAR(5) NOT NULL,
 
     --Restricciones
-    CONSTRAINT pk_direcciones PRIMARY KEY (id_direcciones),
+    CONSTRAINT pk_direcciones PRIMARY KEY (id_direccion)
 );
 
-CREATE TABLE cliente_direcciones (
+CREATE TABLE IF NOT EXISTS cliente_direcciones (
     id_direccion INT NOT NULL,
     id_cliente INT NOT NULL,
 
@@ -119,10 +118,10 @@ CREATE TABLE cliente_direcciones (
 );
 
 -- 2. Tablas relacionadas con el producto
-CREATE TABLE producto (
+CREATE TABLE IF NOT EXISTS producto (
     id_producto SERIAL,
     nombre VARCHAR(150) NOT NULL,
-    descripcion VARCHAR(MAX),
+    descripcion VARCHAR(5000),
     id_categoria INT NOT NULL,
     id_marca INT NOT NULL,
     precio DECIMAL(10, 2) NOT NULL,
@@ -136,7 +135,7 @@ CREATE TABLE producto (
     CONSTRAINT ck_producto_peso CHECK (peso >= 0)
 );
 
-CREATE TABLE producto_especificaciones (
+CREATE TABLE IF NOT EXISTS producto_especificaciones (
     id_producto INT NOT NULL,
     nombre_especificacion VARCHAR(100) NOT NULL,
     valor VARCHAR(255) NOT NULL,
@@ -146,7 +145,7 @@ CREATE TABLE producto_especificaciones (
     CONSTRAINT fk_producto_espec_producto FOREIGN KEY (id_producto) REFERENCES producto(id_producto)
 );
 
-CREATE TABLE componentes_computadora (
+CREATE TABLE IF NOT EXISTS componentes_computadora (
     id_computadora INT NOT NULL,
     id_componente INT NOT NULL,
     cantidad INT NOT NULL DEFAULT 1,
@@ -159,7 +158,7 @@ CREATE TABLE componentes_computadora (
 );
 
 -- 3. Tablas de establecimientos e inventario
-CREATE TABLE establecimiento (
+CREATE TABLE IF NOT EXISTS establecimiento (
     id_establecimiento SERIAL PRIMARY KEY,
     tipo_establecimiento VARCHAR(50) NOT NULL,
     nombre VARCHAR(100) NOT NULL,
@@ -170,7 +169,7 @@ CREATE TABLE establecimiento (
     CONSTRAINT ck_establecimiento_tipo CHECK (tipo_establecimiento IN ('tienda', 'almacen'))
 );
 
-CREATE TABLE inventario (
+CREATE TABLE IF NOT EXISTS inventario (
     id_establecimiento INT NOT NULL,
     id_producto INT NOT NULL,
     stock INT NOT NULL DEFAULT 0,
@@ -183,7 +182,7 @@ CREATE TABLE inventario (
 );
 
 -- 4. Tablas transaccionales principales (Pedidos, Entregas y Pagos)
-CREATE TABLE pedido (
+CREATE TABLE IF NOT EXISTS pedido (
     id_pedido SERIAL,
     id_cliente INT NOT NULL,
     fecha_pedido TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -200,7 +199,7 @@ CREATE TABLE pedido (
 );
 
 
-CREATE TABLE articulos_pedido (
+CREATE TABLE IF NOT EXISTS articulos_pedido (
     id_pedido INT NOT NULL,
     id_producto INT NOT NULL,
     id_establecimiento INT NOT NULL,
@@ -216,7 +215,7 @@ CREATE TABLE articulos_pedido (
     CONSTRAINT ck_art_pedido_precio CHECK (precio_unit >= 0)
 );
 
-CREATE TABLE entrega (
+CREATE TABLE IF NOT EXISTS entrega (
     id_entrega SERIAL,
     id_pedido INT NOT NULL,
     tipo_entrega VARCHAR(50) NOT NULL,
@@ -240,7 +239,7 @@ CREATE TABLE entrega (
 
 );
 
-CREATE TABLE pago (
+CREATE TABLE IF NOT EXISTS pago (
     id_pago SERIAL,
     id_pedido INT NOT NULL,
     fecha_pago TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -258,12 +257,12 @@ CREATE TABLE pago (
     CONSTRAINT ck_pago_tarjeta CHECK (tarjeta_last_digits ~ '^[0-9]{4}$')
 );
 
-CREATE TABLE reembolso (
+CREATE TABLE IF NOT EXISTS reembolso (
     id_reembolso SERIAL,
     id_pago INT NOT NULL,
     fecha_reembolso TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     monto DECIMAL(10, 2) NOT NULL,
-    motivo VARCHAR(MAX),
+    motivo VARCHAR(2000),
     estado_reembolso VARCHAR(50) NOT NULL,
 
     -- Restricciones
@@ -274,7 +273,7 @@ CREATE TABLE reembolso (
 );
 
 -- 5. Tablas de Carrito de Compras
-CREATE TABLE carrito (
+CREATE TABLE IF NOT EXISTS carrito (
     id_carrito SERIAL,
     id_cliente INT NOT NULL,
     fecha_creacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -286,7 +285,7 @@ CREATE TABLE carrito (
     CONSTRAINT ck_carrito_estado CHECK (estado IN ('activo', 'abandonado', 'completado'))
 );
 
-CREATE TABLE articulos_carrito (
+CREATE TABLE IF NOT EXISTS articulos_carrito (
     id_carrito INT NOT NULL,
     id_producto INT NOT NULL,
     cantidad INT NOT NULL,
