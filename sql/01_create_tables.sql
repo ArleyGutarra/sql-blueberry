@@ -12,29 +12,30 @@
 
 -- ESQUEMA DE BASE DE DATOS PARA LA TIENDA EN LÍNEA "BLUEBERRY"
 -- Catálogos
--- marca(#id_marca, nombre, descripcion)
--- metodos_pago(#id_metodo_pago, nombre, descripcion)
--- categoria(#id_categoria, super_categoria, nombre, descripcion)
+-- marca(#id_marca, nombre, descripcion, pais)
+-- metodos_pago(#id_metodo_pago, nombre_metodo_pago)
+-- categoria(#id_categoria, #super_categoria, nombre, descripcion)
 
 -- Cliente
--- cliente(#id_cliente, email, password_hash, telefono, dni, nombres, apellidos, fecha_nacimiento)
--- cliente_direcciones(#id_direccion_cliente, #id_cliente, departamento, provincia, distrito, direccion, referencia)
+-- cliente(id_cliente, email, password_hash, telefono, dni, nombres, apellidos, fecha_nacimiento)  
+-- direccion(id_direccion, departamento, provincia, distrito, direccion, codigo_postal, referencia)
+-- cliente_direcciones(#id_direccion, #id_cliente)  
 
 -- Productos
--- producto(#id_producto, nombre, descripcion, id_categoria, id_marca, precio, peso)
+-- producto(id_producto, nombre, descripcion, id_categoria, id_marca, precio, peso)
 -- producto_especificaciones(#id_producto, nombre_especificacion, valor)
 -- componentes_computadora(#id_computadora, #id_componente, cantidad)
 
 -- Establecimientos e inventario
--- establecimiento(#id_establecimiento, tipo_establecimiento, nombre, ciudad, ubicacion)
+-- establecimiento(id_establecimiento, tipo_establecimiento, nombre, #id_direccion)  
 -- inventario(#id_establecimiento, #id_producto, stock)
 
 -- Pedidos, entregas y pagos
--- pedido(#id_pedido, #id_cliente, fecha_pedido, estado_pedido, subtotal_productos, costo_envio, descuento)
+-- pedido(id_pedido, #id_cliente, fecha_pedido, estado_pedido, subtotal_productos, costo_envio, descuento)
 -- articulos_pedido(#id_pedido, #id_producto, #id_establecimiento, cantidad, precio_unit)
--- entrega(#id_entrega, #id_pedido, tipo_entrega, estado_entrega, fecha_entrega, lugar_origen, lugar_destino)
--- pago(#id_pago, #id_pedido, fecha_pago, id_metodo_pago, codigo_transaccion, tarjeta_last_digits, estado_pago)
--- reembolso(#id_reembolso, #id_pago, fecha_reembolso, monto, motivo, estado_reembolso)
+-- entrega(id_entrega, #id_pedido, tipo_entrega, estado_entrega, fecha_entrega, #lugar_origen, #id_lugar_destino)
+-- pago(id_pago, #id_pedido, fecha_pago, id_metodo_pago, codigo_transaccion, tarjeta_last_digits, estado_pago)
+-- reembolso(id_reembolso, #id_pago, fecha_reembolso, monto, motivo, estado_reembolso)
 
 -- Carrito de compras
 -- carrito(#id_carrito, #id_cliente, fecha_creacion, estado)
@@ -46,6 +47,7 @@
 CREATE TABLE marca (
     id_marca SERIAL,
     nombre VARCHAR(100) NOT NULL,
+    pais VARCHAR(100) NOT NULL,  -- pais de ....
     descripcion VARCHAR(MAX),
 
     -- Restricciones
@@ -55,12 +57,11 @@ CREATE TABLE marca (
 
 CREATE TABLE metodos_pago (
     id_metodo_pago SERIAL,
-    nombre VARCHAR(50) NOT NULL,
-    descripcion VARCHAR(MAX),
+    nombre_metodo_pago VARCHAR(50) NOT NULL,
 
     -- Restricciones
     CONSTRAINT pk_metodos_pago PRIMARY KEY (id_metodo_pago),
-    CONSTRAINT uq_metodos_pago_nombre UNIQUE (nombre)
+    CONSTRAINT uq_metodos_pago_nombre_metodo_pago UNIQUE (nombre_metodo_pago)
 );
 
 CREATE TABLE categoria (
@@ -94,18 +95,27 @@ CREATE TABLE cliente (
     CONSTRAINT ck_cliente_email CHECK (email ~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
 );
 
-CREATE TABLE cliente_direcciones (
-    id_direccion_cliente SERIAL,
-    id_cliente INT NOT NULL,
+CREATE TABLE direcciones (
+    id_direccion SERIAL,
     departamento VARCHAR(100) NOT NULL,
     provincia VARCHAR(100) NOT NULL,
     distrito VARCHAR(100) NOT NULL,
     direccion VARCHAR(255) NOT NULL,
     referencia VARCHAR(255),
+    codigo_postal CHAR(5) NOT NULL,
 
     --Restricciones
-    CONSTRAINT pk_cliente_direcciones PRIMARY KEY (id_direccion_cliente),
-    CONSTRAINT fk_cliente_direcciones__cliente FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente)
+    CONSTRAINT pk_direcciones PRIMARY KEY (id_direcciones),
+);
+
+CREATE TABLE cliente_direcciones (
+    id_direccion INT NOT NULL,
+    id_cliente INT NOT NULL,
+
+    --Restricciones
+    CONSTRAINT pk_cliente_direcciones PRIMARY KEY (id_cliente, id_direccion),
+    CONSTRAINT fk_cliente_direcciones__cliente FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente),
+    CONSTRAINT fk_cliente_direcciones__direccion FOREIGN KEY (id_direccion) REFERENCES direcciones(id_direccion)
 );
 
 -- 2. Tablas relacionadas con el producto
@@ -153,12 +163,11 @@ CREATE TABLE establecimiento (
     id_establecimiento SERIAL PRIMARY KEY,
     tipo_establecimiento VARCHAR(50) NOT NULL,
     nombre VARCHAR(100) NOT NULL,
-    ciudad VARCHAR(100) NOT NULL,
-    ubicacion VARCHAR(255) NOT NULL,
+    id_direccion INT NOT NULL,
 
-    CONSTRAINT ck_establecimiento_tipo
-    CHECK (tipo_establecimiento IN (
-        'tienda', 'almacen'))
+    -- Restricciones
+    CONSTRAINT fk_establecimiento__direccion FOREIGN KEY (id_direccion) REFERENCES direcciones(id_direccion),
+    CONSTRAINT ck_establecimiento_tipo CHECK (tipo_establecimiento IN ('tienda', 'almacen'))
 );
 
 CREATE TABLE inventario (
@@ -214,17 +223,17 @@ CREATE TABLE entrega (
     estado_entrega VARCHAR(50) NOT NULL,
     fecha_entrega TIMESTAMP,
     lugar_origen INT NOT NULL,
-    lugar_destino INT, -- Puede ser NULL si el tipo entrega es "recojo_tienda"
+    id_lugar_destino INT, -- Puede ser NULL si el tipo entrega es "recojo_tienda"
 
     -- Restricciones
     CONSTRAINT pk_entrega PRIMARY KEY (id_entrega),
     CONSTRAINT fk_entrega__pedido FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido),
     CONSTRAINT fk_entrega__origen FOREIGN KEY (lugar_origen) REFERENCES establecimiento(id_establecimiento),
-    CONSTRAINT fk_entrega__destino FOREIGN KEY (lugar_destino) REFERENCES cliente_direcciones(id_direccion_cliente),
+    CONSTRAINT fk_entrega__destino FOREIGN KEY (id_lugar_destino) REFERENCES direcciones(id_direccion),
     CONSTRAINT ck_entrega_tipo CHECK (
-    (tipo_entrega = 'envio' AND lugar_destino IS NOT NULL)
+    (tipo_entrega = 'envio' AND id_lugar_destino IS NOT NULL)
     OR
-    (tipo_entrega = 'recojo_tienda' AND lugar_destino IS NULL)
+    (tipo_entrega = 'recojo_tienda' AND id_lugar_destino IS NULL)
     ),
     CONSTRAINT ck_entrega_estado CHECK (estado_entrega IN ('pendiente', 'en_preparacion', 'en_transito', 'listo_para_recojo', 'entregado','cancelado')
 )
